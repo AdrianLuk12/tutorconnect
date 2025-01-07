@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'djoser',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -143,11 +144,13 @@ SIMPLE_JWT = {
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DJOSER = {
+    "LOGIN_FIELD": "email",
+    "REQUIRED_FIELDS": ["username"],
+    "USER_CREATE_PASSWORD_RETYPE": True, # change later
     "PASSWORD_RESET_CONFIRM_URL": "auth/password/reset-password-confirmation/?uid={uid}&token={token}",
     "ACTIVATION_URL": "#/activate/{uid}/{token}",
     "SEND_ACTIVATION_EMAIL": False,
     "SERIALIZERS": {},
-    "LOGIN_FIELD": "email",
 }
 
 SITE_NAME = "TutorConnect"
@@ -158,3 +161,5 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
+
+AUTH_USER_MODEL = 'users.CustomUser'
