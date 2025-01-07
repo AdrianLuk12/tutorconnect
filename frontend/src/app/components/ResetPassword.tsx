@@ -17,7 +17,7 @@ const ResetPassword = () => {
     const onSubmit = async (data: FormData) => {
         try {
             await resetPassword(data.email).res();
-            alert("Password reset email sent. Please check your inbox.");
+            alert("Password reset email sent if account exists. Please check your inbox.");
         } catch (err) {
             alert("Failed to send password reset email. Please try again.");
         }

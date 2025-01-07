@@ -1,5 +1,6 @@
 import wretch, { Wretch, WretchError } from "wretch";
 import { AuthActions } from "@/app/auth/utils";
+import Cookies from "js-cookie";
 
 // Extract necessary functions from the AuthActions utility.
 const { handleJWTRefresh, storeToken, getToken } = AuthActions();
@@ -30,6 +31,8 @@ const api = () => {
                         .json();
                 } catch (err) {
                     window.location.replace("/");
+                    Cookies.remove("accessToken");
+                    Cookies.remove("refreshToken");
                 }
             })
     );

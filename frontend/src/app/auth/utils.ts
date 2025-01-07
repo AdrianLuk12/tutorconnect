@@ -64,6 +64,30 @@ const resetPasswordConfirm = (
 };
 
 export const AuthActions = () => {
+    const isAuthenticated = () => {
+        if (typeof window !== 'undefined') {
+            const token = Cookies.get('accessToken');
+            return !!token;
+        }
+        return false;
+    };
+
+    const autoLoginAfterRegister = async (email: string, password: string) => {
+        try {
+            const response = await (await login(email, password)).json();
+            if (!response || typeof response !== 'object') {
+                throw new Error('Invalid response format');
+            }
+            const { access, refresh } = response as { access: string; refresh: string };
+            storeToken(access, "access");
+            storeToken(refresh, "refresh");
+            return true;
+        } catch (error) {
+            console.error("Auto login failed:", error);
+            return false;
+        }
+    };
+
     return {
         login,
         resetPasswordConfirm,
@@ -74,5 +98,7 @@ export const AuthActions = () => {
         getToken,
         logout,
         removeTokens,
+        isAuthenticated,
+        autoLoginAfterRegister,
     };
 };  

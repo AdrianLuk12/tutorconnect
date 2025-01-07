@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AuthActions } from "@/app/auth/utils";
 import { useRouter } from "next/navigation";
@@ -19,7 +19,15 @@ const Login = () => {
 
     const router = useRouter();
 
-    const { login, storeToken } = AuthActions();
+    const { login, storeToken, isAuthenticated } = AuthActions();
+
+    const [showPassword, setShowPassword] = useState(false);
+
+    useEffect(() => {
+        if (isAuthenticated()) {
+            router.push('/dashboard');
+        }
+    }, [router]);
 
     const onSubmit = (data: FormData) => {
         login(data.email, data.password)
@@ -27,7 +35,7 @@ const Login = () => {
                 storeToken(json.access, "access");
                 storeToken(json.refresh, "refresh");
 
-                router.push("dashboard");
+                router.push("/dashboard");
             })
             .catch((err) => {
                 setError("root", { type: "manual", message: err.json.detail });
@@ -37,7 +45,7 @@ const Login = () => {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="px-8 py-6 mt-4 text-left bg-white shadow-lg w-1/3">
-                <h3 className="text-2xl font-semibold">Login to your account</h3>
+                <h3 className="text-2xl font-semibold">Login</h3>
                 <form onSubmit={handleSubmit(onSubmit)} className="mt-4">
                     <div>
                         <label className="block" htmlFor="email">
@@ -45,7 +53,7 @@ const Login = () => {
                         </label>
                         <input
                             type="text"
-                            placeholder="Email"
+                            placeholder="john.doe@example.com"
                             {...register("email", { required: true })}
                             className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
                         />
@@ -57,12 +65,21 @@ const Login = () => {
                         <label className="block" htmlFor="password">
                             Password
                         </label>
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            {...register("password", { required: true })}
-                            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                placeholder=""
+                                {...register("password", { required: true })}
+                                className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                            />
+                            <button
+                                type="button"
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? "👁️" : "👁️‍🗨️"}
+                            </button>
+                        </div>
                         {errors.password && (
                             <span className="text-xs text-red-600">Password is required</span>
                         )}

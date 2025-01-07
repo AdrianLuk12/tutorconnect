@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AuthActions } from "@/app/auth/utils";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ type FormData = {
     username: string;
     password: string;
     re_password: string;
+    terms: boolean;
 };
 
 const Register = () => {
@@ -21,50 +22,68 @@ const Register = () => {
 
     const router = useRouter();
 
-    const { register: registerUser } = AuthActions(); // Note: Renamed to avoid naming conflict with useForm's register
+    const { register: registerUser, isAuthenticated, autoLoginAfterRegister } = AuthActions();
 
-    const onSubmit = (data: FormData) => {
-        registerUser(data.email, data.username, data.password, data.re_password)
-            .json(() => {
-                router.push("/");
-            })
-            .catch((err) => {
-                if (err.json.detail) {
-                    setError("root", {
-                        type: "manual",
-                        message: err.json.detail[0],
-                    });
-                }
-                // setError("root", {
-                //     type: "manual",
-                //     message: err.json.detail,
-                // });
-                if (err.json.email) {
-                    setError("email", {
-                        type: "manual",
-                        message: err.json.email[0],
-                    });
-                }
-                if (err.json.password) {
-                    setError("password", {
-                        type: "manual",
-                        message: err.json.password[0],
-                    });
-                }
-                if (err.json.non_field_errors) {
-                    setError("re_password", {
-                        type: "manual",
-                        message: err.json.non_field_errors[0],
-                    });
-                }
-                
-            });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    useEffect(() => {
+        if (isAuthenticated()) {
+            router.push('/dashboard');
+        }
+    }, [router]);
+
+    const onSubmit = async (data: FormData) => {
+        try {
+            await registerUser(data.email, data.username, data.password, data.re_password).json();
+            
+            // Auto login after successful registration
+            const loginSuccess = await autoLoginAfterRegister(data.email, data.password);
+            
+            if (loginSuccess) {
+                router.push("/dashboard");
+            } else {
+                router.push("/auth/login");
+                alert("Account created successfully. Please login.");
+            }
+        } catch (err: any) {
+            if (err.json.detail) {
+                setError("root", {
+                    type: "manual",
+                    message: err.json.detail[0],
+                });
+            }
+            if (err.json.email) {
+                setError("email", {
+                    type: "manual",
+                    message: err.json.email[0],
+                });
+            }
+            if (err.json.username) {
+                setError("username", {
+                    type: "manual",
+                    message: err.json.username[0],
+                });
+            }
+            if (err.json.password) {
+                setError("password", {
+                    type: "manual",
+                    message: err.json.password[0],
+                });
+            }
+            if (err.json.non_field_errors) {
+                setError("re_password", {
+                    type: "manual",
+                    message: err.json.non_field_errors[0],
+                });
+            }
+        }
     };
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="px-8 py-6 mt-4 text-left bg-white shadow-lg w-1/3">
-                <h3 className="text-2xl font-semibold">Register your account</h3>
+                <h3 className="text-2xl font-semibold">Register</h3>
                 <form onSubmit={handleSubmit(onSubmit)} className="mt-4">
                     <div>
                         <label className="block" htmlFor="email">
@@ -72,7 +91,7 @@ const Register = () => {
                         </label>
                         <input
                             type="text"
-                            placeholder="Email"
+                            placeholder="john.doe@example.com"
                             {...register("email", { required: "Email is required" })}
                             className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
                         />
@@ -88,7 +107,7 @@ const Register = () => {
                         </label>
                         <input
                             type="text"
-                            placeholder="Username"
+                            placeholder="JohnDoe"
                             {...register("username", { required: "Username is required" })}
                             className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
                         />
@@ -102,12 +121,20 @@ const Register = () => {
                         <label className="block" htmlFor="password">
                             Password
                         </label>
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            {...register("password", { required: "Password is required" })}
-                            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                {...register("password", { required: "Password is required" })}
+                                className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                            />
+                            <button
+                                type="button"
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? "👁️" : "👁️‍🗨️"}
+                            </button>
+                        </div>
                         {errors.password && (
                             <span className="text-xs text-red-600">
                                 {errors.password.message}
@@ -118,15 +145,38 @@ const Register = () => {
                         <label className="block" htmlFor="re_password">
                             Confirm Password
                         </label>
-                        <input
-                            type="password"
-                            placeholder="Confirm Password"
-                            {...register("re_password", { required: "Confirm Password is required" })}
-                            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
-                        />
+                        <div className="relative">
+                            <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                {...register("re_password", { required: "Confirm Password is required" })}
+                                className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                            />
+                            <button
+                                type="button"
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                                {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+                            </button>
+                        </div>
                         {errors.re_password && (
                             <span className="text-xs text-red-600">
                                 {errors.re_password.message}
+                            </span>
+                        )}
+                    </div>
+                    <div className="mt-4">
+                        <label className="flex items-center text-sm">
+                            <input
+                                type="checkbox"
+                                {...register("terms", { required: "You must accept the Terms and Privacy Policy" })}
+                                className="mr-2"
+                            />
+                            <span>I accept the <a href="#" className="text-blue-600 hover:underline">Terms of Use</a> & <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a></span>
+                        </label>
+                        {errors.terms && (
+                            <span className="text-xs text-red-600">
+                                {errors.terms.message}
                             </span>
                         )}
                     </div>
@@ -140,14 +190,15 @@ const Register = () => {
                     )}
                 </form>
 
-                <div className="mt-6 text-center">
+                {/* <div className="mt-6 text-center">
                     <Link
-                        href="/"
+                        href="/auth/login"
                         className="text-sm text-blue-600 hover:underline"
                     >
-                        Login
+                        Already have an account? Sign in
                     </Link>
-                </div>
+                </div> */}
+                <div className="text-sm text-center">Already have an account? <a href="/auth/login" className="text-sm text-blue-600 hover:underline">Sign in</a></div>
             </div>
         </div>
     );
