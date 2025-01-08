@@ -93,15 +93,16 @@ const Login = () => {
                         <span className="text-xs text-red-600">{errors.root.message}</span>
                     )}
                 </form>
-                <div className="mt-4 text-center">
+                {/* <div className="mt-4 text-center">
                     <Link
                         href="/auth/register"
                         className="text-sm text-blue-600 hover:underline"
                     >
                         Register
                     </Link>
-                </div>
-                <div className="mt-6 text-center">
+                </div> */}
+                <div className="mt-4 text-sm text-center">Don't have an account? <a href="/auth/register" className="text-sm text-blue-600 hover:underline">Sign up</a></div>
+                <div className="mt-4 text-center">
                     <Link
                         href="/auth/password/reset-password"
                         className="text-sm text-blue-600 hover:underline"

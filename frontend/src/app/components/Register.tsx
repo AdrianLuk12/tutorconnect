@@ -9,6 +9,8 @@ type FormData = {
     username: string;
     password: string;
     re_password: string;
+    // first_name: string;
+    // last_name: string;
     terms: boolean;
 };
 
@@ -35,7 +37,14 @@ const Register = () => {
 
     const onSubmit = async (data: FormData) => {
         try {
-            await registerUser(data.email, data.username, data.password, data.re_password).json();
+            await registerUser(
+                data.email, 
+                data.username, 
+                data.password, 
+                data.re_password,
+                // data.first_name,
+                // data.last_name
+            ).json();
             
             // Auto login after successful registration
             const loginSuccess = await autoLoginAfterRegister(data.email, data.password);
@@ -103,7 +112,7 @@ const Register = () => {
                     </div>
                     <div className="mt-4">
                         <label className="block" htmlFor="username">
-                            Username
+                            Username (No Spaces)
                         </label>
                         <input
                             type="text"
@@ -165,6 +174,28 @@ const Register = () => {
                             </span>
                         )}
                     </div>
+                    {/* <div className="mt-4">
+                        <label className="block" htmlFor="first_name">
+                            First Name
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="John"
+                            {...register("first_name")}
+                            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                        />
+                    </div>
+                    <div className="mt-4">
+                        <label className="block" htmlFor="last_name">
+                            Last Name
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="Doe"
+                            {...register("last_name")}
+                            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                        />
+                    </div> */}
                     <div className="mt-4">
                         <label className="flex items-center text-sm">
                             <input
@@ -198,7 +229,7 @@ const Register = () => {
                         Already have an account? Sign in
                     </Link>
                 </div> */}
-                <div className="text-sm text-center">Already have an account? <a href="/auth/login" className="text-sm text-blue-600 hover:underline">Sign in</a></div>
+                <div className="mt-4 text-sm text-center">Already have an account? <a href="/auth/login" className="text-sm text-blue-600 hover:underline">Sign in</a></div>
             </div>
         </div>
     );
