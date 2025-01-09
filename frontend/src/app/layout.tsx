@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TutorConnect",
+  title: "TutorMatch",
   description: "A peer learning platform",
 };
 

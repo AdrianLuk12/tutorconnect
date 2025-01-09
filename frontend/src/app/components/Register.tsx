@@ -50,7 +50,7 @@ const Register = () => {
             const loginSuccess = await autoLoginAfterRegister(data.email, data.password);
             
             if (loginSuccess) {
-                router.push("/dashboard");
+                router.push("/onboarding");
             } else {
                 router.push("/auth/login");
                 alert("Account created successfully. Please login.");
