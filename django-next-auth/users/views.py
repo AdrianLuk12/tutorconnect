@@ -55,6 +55,7 @@ class ProfileView(APIView):
     def get(self, request):
         profile = request.user.profile
         return Response({
+            'username': request.user.username,
             'role': profile.role,
             'school': profile.school,
             'profile_picture': request.build_absolute_uri(profile.profile_picture.url) if profile.profile_picture else None,
@@ -66,7 +67,23 @@ class ProfileView(APIView):
     def put(self, request):
         try:
             profile = request.user.profile
+            user = request.user
+
+            # Handle username update
+            new_username = request.data.get('username')
+            if new_username and new_username != user.username:
+                # Check if username is already taken
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                if User.objects.filter(username=new_username).exists():
+                    return Response({
+                        'status': 'error',
+                        'message': 'Username already taken'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                user.username = new_username
+                user.save()
             
+            # Handle existing profile fields
             profile.role = request.data.get('role', profile.role)
             profile.school = request.data.get('school', profile.school)
             profile.bio = request.data.get('bio', profile.bio)
@@ -85,6 +102,7 @@ class ProfileView(APIView):
             profile.save()
             
             return Response({
+                'username': user.username,
                 'role': profile.role,
                 'school': profile.school,
                 'profile_picture': request.build_absolute_uri(profile.profile_picture.url) if profile.profile_picture else None,

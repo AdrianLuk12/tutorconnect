@@ -9,6 +9,7 @@ import useSWR from "swr";
 import { fetcher } from "@/app/fetcher";
 
 type ProfileData = {
+    username: string;
     role: 'student' | 'tutor' | 'both';
     school: string;
     profile_picture?: FileList;
@@ -75,6 +76,7 @@ export default function Profile() {
                 
                 const profileData: ProfileData = {
                     ...data,
+                    username: user?.username || '',
                     profile_picture: undefined // Convert string to undefined since we can't show the existing image in the form
                 };
                 
@@ -92,6 +94,7 @@ export default function Profile() {
 
     const onSubmit = async (data: ProfileData) => {
         const formData = new FormData();
+        formData.append('username', data.username);
         formData.append('role', data.role);
         formData.append('school', data.school);
         formData.append('subjects_need_help', JSON.stringify(selectedSubjectsNeed));
@@ -111,6 +114,7 @@ export default function Profile() {
 
             setProfileData({
                 ...result,
+                username: user?.username || '',
                 profile_picture: undefined
             });
             setIsEditing(false);
@@ -168,6 +172,19 @@ export default function Profile() {
 
                 {isEditing ? (
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                        <div>
+                            <label className="block mb-2">Username</label>
+                            <input
+                                type="text"
+                                {...register('username', { required: true })}
+                                defaultValue={user?.username}
+                                className="w-full p-2 border rounded"
+                            />
+                            {errors.username && (
+                                <span className="text-red-500 text-sm">Username is required</span>
+                            )}
+                        </div>
+
                         <div>
                             <label className="block mb-2">I want to...</label>
                             <select
