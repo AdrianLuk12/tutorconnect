@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import wretch from 'wretch';
 import { AuthActions } from "@/app/auth/utils";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
+import { fetcher } from "@/app/fetcher";
 
 type ProfileData = {
     role: 'student' | 'tutor' | 'both';
@@ -23,6 +25,14 @@ interface ProfileResponse {
     subjects_need_help: string[];
     subjects_can_teach: string[];
     bio: string;
+}
+
+// Add user interface
+interface User {
+    username: string;
+    email: string;
+    first_name?: string;
+    last_name?: string;
 }
 
 const AVAILABLE_SUBJECTS = [
@@ -50,6 +60,8 @@ export default function Profile() {
     } = useForm<ProfileData>();
 
     const role = watch('role');
+
+    const { data: user } = useSWR<User>("/auth/users/me", fetcher);
 
     // Fetch profile data
     useEffect(() => {
@@ -257,6 +269,20 @@ export default function Profile() {
                     </form>
                 ) : (
                     <div className="space-y-6">
+                        <div>
+                            <h4 className="font-semibold mb-2">Account Details</h4>
+                            <div className="space-y-2">
+                                <p><span className="font-medium">Username:</span> {user?.username}</p>
+                                <p><span className="font-medium">Email:</span> {user?.email}</p>
+                                {user?.first_name && (
+                                    <p><span className="font-medium">First Name:</span> {user?.first_name}</p>
+                                )}
+                                {user?.last_name && (
+                                    <p><span className="font-medium">Last Name:</span> {user?.last_name}</p>
+                                )}
+                            </div>
+                        </div>
+
                         <div>
                             <h4 className="font-semibold mb-2">Role</h4>
                             <p>{profileData.role === 'both' ? 'Student & Tutor' : 

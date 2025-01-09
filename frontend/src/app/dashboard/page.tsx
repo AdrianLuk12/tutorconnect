@@ -22,13 +22,6 @@ export default function Home() {
                 <h1 className="text-2xl font-bold mb-4">
                     Hi, {user?.username || user?.first_name}!
                 </h1>
-                <p className="mb-4">Your account details:</p>
-                <ul className="mb-4">
-                    <li>Username: {user?.username}</li>
-                    <li>Email: {user?.email}</li>
-                    {user?.first_name && <li>First Name: {user?.first_name}</li>}
-                    {user?.last_name && <li>Last Name: {user?.last_name}</li>}
-                </ul>
             </div>
         </div>
     );
