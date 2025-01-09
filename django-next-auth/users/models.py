@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db.models import Q
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -85,3 +86,32 @@ class Match(models.Model):
 
     class Meta:
         unique_together = ('user_a', 'user_b')
+
+    @classmethod
+    def create_or_update(cls, user_a, user_b, status):
+        # Try to find existing match in either direction
+        match = cls.objects.filter(
+            (Q(user_a=user_a) & Q(user_b=user_b)) |
+            (Q(user_a=user_b) & Q(user_b=user_a))
+        ).first()
+        
+        if match:
+            # Update existing match
+            if match.user_a == user_a:
+                match.status_a = status
+            else:
+                match.status_b = status
+            match.save()
+        else:
+            # Create new match
+            match = cls.objects.create(
+                user_a=user_a,
+                user_b=user_b,
+                status_a=status,
+                status_b=cls.PENDING
+            )
+        return match
+
+    @property
+    def is_mutual_match(self):
+        return self.status_a == self.ACCEPTED and self.status_b == self.ACCEPTED

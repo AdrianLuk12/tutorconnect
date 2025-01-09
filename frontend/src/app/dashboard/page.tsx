@@ -1,11 +1,14 @@
 "use client";
 
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { fetcher } from "@/app/fetcher";
 import { useRouter } from "next/navigation";
+import wretch from "wretch";
+import { getToken } from "@/app/auth/utils";
 
 interface PotentialMatch {
     user: {
+        id: number;
         username: string;
         profile_picture: string | null;
     };
@@ -21,6 +24,34 @@ export default function Dashboard() {
     const router = useRouter();
     const { data: user } = useSWR("/auth/users/me", fetcher);
     const { data: matches } = useSWR<PotentialMatch[]>("/potential-matches", fetcher);
+
+    const handleMatch = async (userId: number) => {
+        try {
+            await wretch("http://localhost:8000")
+                .auth(`Bearer ${getToken("access")}`)
+                .url(`/matches/${userId}/`)
+                .post({ action: 'accept' });
+            
+            // Refresh the potential matches
+            mutate('/potential-matches');
+        } catch (error) {
+            console.error('Error matching:', error);
+        }
+    };
+
+    const handlePass = async (userId: number) => {
+        try {
+            await wretch("http://localhost:8000")
+                .auth(`Bearer ${getToken("access")}`)
+                .url(`/matches/${userId}/`)
+                .post({ action: 'reject' });
+            
+            // Refresh the potential matches
+            mutate('/potential-matches');
+        } catch (error) {
+            console.error('Error passing:', error);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -45,7 +76,7 @@ export default function Dashboard() {
                     {matches?.map((match, index) => (
                         <div key={index} className="bg-white rounded-lg shadow-lg p-6">
                             <div className="flex items-center mb-4">
-                                {match.user.profile_picture ? (
+                                {/* {match.user.profile_picture ? (
                                     <img
                                         src={match.user.profile_picture}
                                         alt={match.user.username}
@@ -53,7 +84,7 @@ export default function Dashboard() {
                                     />
                                 ) : (
                                     <div className="w-12 h-12 rounded-full bg-gray-200 mr-4" />
-                                )}
+                                )} */}
                                 <div>
                                     <h2 className="text-xl font-semibold">{match.user.username}</h2>
                                     <p className="text-gray-600">{match.school}</p>
@@ -89,10 +120,16 @@ export default function Dashboard() {
                             <p className="text-gray-700 mb-4">{match.bio}</p>
 
                             <div className="flex justify-end space-x-2">
-                                <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                                <button 
+                                    onClick={() => handleMatch(match.user.id)}
+                                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                                >
                                     Match
                                 </button>
-                                <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                                <button 
+                                    onClick={() => handlePass(match.user.id)}
+                                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                >
                                     Pass
                                 </button>
                             </div>

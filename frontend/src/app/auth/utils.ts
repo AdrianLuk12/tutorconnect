@@ -17,7 +17,7 @@ const storeToken = (token: string, type: "access" | "refresh") => {
  * @param {"access" | "refresh"} type - The type of token to retrieve (access or refresh).
  * @returns {string | undefined} The token, if found.
  */
-const getToken = (type: string) => {
+export const getToken = (type: string) => {
     return Cookies.get(type + "Token");
 }
 

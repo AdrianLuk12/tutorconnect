@@ -124,6 +124,52 @@ class PotentialMatchesView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+
+        # # For testing/demo purposes, return mock data
+        # mock_matches = [
+        #     {
+        #         'user': {
+        #             'username': 'math_wizard',
+        #             'profile_picture': None
+        #         },
+        #         'school': 'Stanford University',
+        #         'subjects_need_help': ['Physics', 'Chemistry'],
+        #         'subjects_can_teach': ['Calculus', 'Linear Algebra'],
+        #         'bio': 'Math enthusiast looking to help others while improving my science knowledge.',
+        #         'can_help_with': ['Calculus'],
+        #         'can_get_help_with': ['Physics']
+        #     },
+        #     {
+        #         'user': {
+        #             'username': 'science_guru', 
+        #             'profile_picture': None
+        #         },
+        #         'school': 'MIT',
+        #         'subjects_need_help': ['Literature', 'History'],
+        #         'subjects_can_teach': ['Physics', 'Chemistry'],
+        #         'bio': 'PhD student passionate about making science accessible to everyone.',
+        #         'can_help_with': ['Physics'],
+        #         'can_get_help_with': ['Literature']
+        #     },
+        #     {
+        #         'user': {
+        #             'username': 'history_buff',
+        #             'profile_picture': None
+        #         },
+        #         'school': 'Harvard University', 
+        #         'subjects_need_help': ['Computer Science', 'Mathematics'],
+        #         'subjects_can_teach': ['History', 'Literature'],
+        #         'bio': 'History major looking to expand into STEM fields.',
+        #         'can_help_with': ['Literature'],
+        #         'can_get_help_with': ['Mathematics']
+        #     }
+        # ]
+
+        # # return Response(mock_matches)
+
+
+
+
         user = request.user
         profile = user.profile
         
@@ -146,7 +192,6 @@ class PotentialMatchesView(APIView):
         ).exclude(
             user=user
         ).filter(
-            school=profile.school,  # Same school
             is_onboarded=True      # Only onboarded users
         )
 
@@ -162,6 +207,7 @@ class PotentialMatchesView(APIView):
             if can_help_with or can_get_help_with:
                 matches.append({
                     'user': {
+                        'id': potential_match.user.id,
                         'username': potential_match.user.username,
                         'profile_picture': request.build_absolute_uri(potential_match.profile_picture.url) if potential_match.profile_picture else None,
                     },
@@ -174,3 +220,60 @@ class PotentialMatchesView(APIView):
                 })
         
         return Response(matches)
+
+class MatchActionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        try:
+            target_user = get_user_model().objects.get(id=user_id)
+            action = request.data.get('action')
+            
+            if action not in ['accept', 'reject']:
+                return Response(
+                    {'error': 'Invalid action'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            match_status = Match.ACCEPTED if action == 'accept' else Match.REJECTED
+            match = Match.create_or_update(request.user, target_user, match_status)
+            
+            return Response({'status': 'success'})
+            
+        except get_user_model().DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class MatchesListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        
+        # Get all matches where the user is either user_a or user_b
+        matches = Match.objects.filter(
+            (Q(user_a=user) & Q(status_a=Match.ACCEPTED) & Q(status_b=Match.ACCEPTED)) |
+            (Q(user_b=user) & Q(status_a=Match.ACCEPTED) & Q(status_b=Match.ACCEPTED))
+        )
+        
+        matched_users = []
+        for match in matches:
+            # Get the other user in the match
+            other_user = match.user_b if match.user_a == user else match.user_a
+            other_profile = other_user.profile
+            
+            matched_users.append({
+                'user': {
+                    'id': other_user.id,
+                    'username': other_user.username,
+                    'profile_picture': request.build_absolute_uri(other_profile.profile_picture.url) if other_profile.profile_picture else None,
+                },
+                'school': other_profile.school,
+                'subjects_need_help': other_profile.subjects_need_help,
+                'subjects_can_teach': other_profile.subjects_can_teach,
+                'bio': other_profile.bio,
+            })
+        
+        return Response(matched_users)
