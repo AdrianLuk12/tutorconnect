@@ -88,7 +88,7 @@ export const AuthActions = () => {
 
     const autoLoginAfterRegister = async (email: string, password: string) => {
         try {
-            const response = await (await login(email, password)).json();
+            const response = await (await login(email.toLowerCase(), password)).json();
             if (!response || typeof response !== 'object') {
                 throw new Error('Invalid response format');
             }

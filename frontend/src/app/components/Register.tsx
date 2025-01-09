@@ -38,7 +38,7 @@ const Register = () => {
     const onSubmit = async (data: FormData) => {
         try {
             await registerUser(
-                data.email, 
+                data.email.toLowerCase(), 
                 data.username, 
                 data.password, 
                 data.re_password,
@@ -47,7 +47,7 @@ const Register = () => {
             ).json();
             
             // Auto login after successful registration
-            const loginSuccess = await autoLoginAfterRegister(data.email, data.password);
+            const loginSuccess = await autoLoginAfterRegister(data.email.toLowerCase(), data.password);
             
             if (loginSuccess) {
                 router.push("/onboarding");

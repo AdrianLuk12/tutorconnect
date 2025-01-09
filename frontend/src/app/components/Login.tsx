@@ -30,7 +30,10 @@ const Login = () => {
     }, [router]);
 
     const onSubmit = (data: FormData) => {
-        login(data.email, data.password)
+        // Convert email to lowercase before sending
+        const email = data.email.toLowerCase();
+        
+        login(email, data.password)
             .json((json) => {
                 storeToken(json.access, "access");
                 storeToken(json.refresh, "refresh");

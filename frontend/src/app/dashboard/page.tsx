@@ -28,29 +28,47 @@ export default function Dashboard() {
 
     const handleMatch = async (userId: number) => {
         try {
+            // Immediately remove the matched profile from the UI
+            if (matches) {
+                const updatedMatches = matches.filter(match => match.user.id !== userId);
+                mutate('/potential-matches', updatedMatches, false); // Update UI immediately
+            }
+
+            // Make the API call
             await wretch("http://localhost:8000")
                 .auth(`Bearer ${getToken("access")}`)
                 .url(`/matches/${userId}/`)
                 .post({ action: 'accept' });
             
-            // Refresh the potential matches
+            // Refresh the data in the background
             mutate('/potential-matches');
         } catch (error) {
             console.error('Error matching:', error);
+            // If there's an error, refresh the data to restore the original state
+            mutate('/potential-matches');
         }
     };
 
     const handlePass = async (userId: number) => {
         try {
+            // Immediately remove the passed profile from the UI
+            if (matches) {
+                const updatedMatches = matches.filter(match => match.user.id !== userId);
+                mutate('/potential-matches', updatedMatches, false); // Update UI immediately
+            }
+
+            // Make the API call
             await wretch("http://localhost:8000")
                 .auth(`Bearer ${getToken("access")}`)
                 .url(`/matches/${userId}/`)
                 .post({ action: 'reject' });
             
-            // Refresh the potential matches
+            // Refresh the data in the background
             mutate('/potential-matches');
         } catch (error) {
             console.error('Error passing:', error);
+            // If there's an error, refresh the data to restore the original state
+            mutate('/potential-matches');
         }
     };
 

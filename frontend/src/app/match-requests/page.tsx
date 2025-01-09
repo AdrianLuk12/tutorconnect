@@ -27,6 +27,13 @@ export default function MatchRequests() {
 
     const handleAccept = async (userId: number) => {
         try {
+            // Immediately remove the request from the UI
+            if (requests) {
+                const updatedRequests = requests.filter(request => request.user.id !== userId);
+                mutate('/match-requests', updatedRequests, false); // Update UI immediately
+            }
+
+            // Make the API call
             await wretch("http://localhost:8000")
                 .auth(`Bearer ${getToken("access")}`)
                 .url(`/matches/${userId}/`)
@@ -37,11 +44,20 @@ export default function MatchRequests() {
             mutate('/matches');
         } catch (error) {
             console.error('Error accepting match:', error);
+            // If there's an error, refresh the data to restore the original state
+            mutate('/match-requests');
         }
     };
 
     const handleReject = async (userId: number) => {
         try {
+            // Immediately remove the request from the UI
+            if (requests) {
+                const updatedRequests = requests.filter(request => request.user.id !== userId);
+                mutate('/match-requests', updatedRequests, false); // Update UI immediately
+            }
+
+            // Make the API call
             await wretch("http://localhost:8000")
                 .auth(`Bearer ${getToken("access")}`)
                 .url(`/matches/${userId}/`)
@@ -51,6 +67,8 @@ export default function MatchRequests() {
             mutate('/match-requests');
         } catch (error) {
             console.error('Error rejecting match:', error);
+            // If there's an error, refresh the data to restore the original state
+            mutate('/match-requests');
         }
     };
 
