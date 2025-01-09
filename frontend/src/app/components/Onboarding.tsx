@@ -5,7 +5,7 @@ import wretch from 'wretch';
 import { AuthActions } from "@/app/auth/utils";
 
 type OnboardingData = {
-    role: 'student' | 'tutor' | 'both';
+    role: 'student' | 'tutor' | 'both' | 'select';
     school: string;
     profile_picture?: FileList;
     subjects_need_help: string[];
@@ -69,13 +69,23 @@ const Onboarding = () => {
                     <div>
                         <label className="block mb-2">I want to...</label>
                         <select
-                            {...register('role', { required: true })}
+                            {...register('role', { 
+                                required: true,
+                                validate: (value) => value !== 'select' || 'Please select a role' 
+                            })}
                             className="w-full p-2 border rounded"
+                            defaultValue="select"
                         >
+                            <option value="select" disabled>Select an option</option>
                             <option value="student">Get Help with Studies</option>
                             <option value="tutor">Tutor Others</option>
                             <option value="both">Both</option>
                         </select>
+                        {errors.role && (
+                            <span className="text-xs text-red-600">
+                                {errors.role.message || 'This field is required'}
+                            </span>
+                        )}
                     </div>
 
                     <div>
