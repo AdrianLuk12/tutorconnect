@@ -7,6 +7,7 @@ import { AuthActions } from "@/app/auth/utils";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { fetcher } from "@/app/fetcher";
+import { mutate } from 'swr';
 
 type ProfileData = {
     username: string;
@@ -20,6 +21,7 @@ type ProfileData = {
 
 // Add interface for API response
 interface ProfileResponse {
+    username: string;
     role: 'student' | 'tutor' | 'both';
     school: string;
     profile_picture: string | null;
@@ -114,9 +116,12 @@ export default function Profile() {
 
             setProfileData({
                 ...result,
-                username: user?.username || '',
+                username: result.username,
                 profile_picture: undefined
             });
+            
+            mutate("/auth/users/me", { ...user, username: result.username }, false);
+            
             setIsEditing(false);
         } catch (error) {
             console.error('Error updating profile:', error);
