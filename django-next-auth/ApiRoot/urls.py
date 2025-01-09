@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from auth.views import LogoutView
-from users.views import OnboardingView, ProfileView
+from users.views import OnboardingView, ProfileView, PotentialMatchesView
 
 urlpatterns = [
     path("auth/", include("djoser.urls")),
@@ -25,4 +25,5 @@ urlpatterns = [
     path("auth/logout", LogoutView.as_view()),
     path('profile/onboarding/', OnboardingView.as_view(), name='complete-onboarding'),
     path('profile/', ProfileView.as_view(), name='profile'),
+    path('potential-matches/', PotentialMatchesView.as_view(), name='potential-matches'),
 ]

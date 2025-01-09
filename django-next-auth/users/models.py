@@ -64,3 +64,24 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=get_user_model())
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+class Match(models.Model):
+    PENDING = 'pending'
+    ACCEPTED = 'accepted'
+    REJECTED = 'rejected'
+    
+    STATUS_CHOICES = [
+        (PENDING, 'Pending'),
+        (ACCEPTED, 'Accepted'),
+        (REJECTED, 'Rejected'),
+    ]
+
+    user_a = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='matches_as_a')
+    user_b = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='matches_as_b')
+    status_a = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
+    status_b = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user_a', 'user_b')

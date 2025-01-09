@@ -3,6 +3,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 import json
+from django.db.models import Q
+from django.contrib.auth import get_user_model
+from .models import Match, Profile
 
 class OnboardingView(APIView):
     permission_classes = [IsAuthenticated]
@@ -116,3 +119,58 @@ class ProfileView(APIView):
                 'status': 'error',
                 'message': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
+
+class PotentialMatchesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        profile = user.profile
+        
+        # Get all existing matches for this user
+        existing_matches = Match.objects.filter(
+            Q(user_a=user) | Q(user_b=user)
+        ).values_list('user_a_id', 'user_b_id')
+        
+        # Flatten and combine matched user IDs
+        matched_users = set()
+        for match in existing_matches:
+            matched_users.update(match)
+        
+        # Remove the current user from the set
+        matched_users.discard(user.id)
+        
+        # Find potential matches based on subjects and school
+        potential_matches = Profile.objects.exclude(
+            user_id__in=matched_users
+        ).exclude(
+            user=user
+        ).filter(
+            school=profile.school,  # Same school
+            is_onboarded=True      # Only onboarded users
+        )
+
+        # Filter based on subject matches
+        matches = []
+        for potential_match in potential_matches:
+            # Check if there's any overlap between what user can teach and what potential match needs
+            can_help_with = set(profile.subjects_can_teach) & set(potential_match.subjects_need_help)
+            # Check if there's any overlap between what user needs and what potential match can teach
+            can_get_help_with = set(profile.subjects_need_help) & set(potential_match.subjects_can_teach)
+            
+            # If there's at least one subject match in either direction
+            if can_help_with or can_get_help_with:
+                matches.append({
+                    'user': {
+                        'username': potential_match.user.username,
+                        'profile_picture': request.build_absolute_uri(potential_match.profile_picture.url) if potential_match.profile_picture else None,
+                    },
+                    'school': potential_match.school,
+                    'subjects_need_help': potential_match.subjects_need_help,
+                    'subjects_can_teach': potential_match.subjects_can_teach,
+                    'bio': potential_match.bio,
+                    'can_help_with': list(can_help_with),
+                    'can_get_help_with': list(can_get_help_with)
+                })
+        
+        return Response(matches)
