@@ -211,7 +211,7 @@ export default function Profile() {
                             />
                         </div>
 
-                        <div>
+                        {/* <div>
                             <label className="block mb-2">Profile Picture</label>
                             <input
                                 type="file"
@@ -219,7 +219,7 @@ export default function Profile() {
                                 {...register('profile_picture')}
                                 className="w-full p-2 border rounded"
                             />
-                        </div>
+                        </div> */}
 
                         {(role === 'student' || role === 'both') && (
                             <div>
@@ -316,7 +316,7 @@ export default function Profile() {
                             <p>{profileData.school}</p>
                         </div>
 
-                        {profileData.profile_picture && (
+                        {/* {profileData.profile_picture && (
                             <div>
                                 <h4 className="font-semibold mb-2">Profile Picture</h4>
                                 <img 
@@ -325,7 +325,7 @@ export default function Profile() {
                                     className="w-32 h-32 object-cover rounded-full"
                                 />
                             </div>
-                        )}
+                        )} */}
 
                         {(profileData.role === 'student' || profileData.role === 'both') && (
                             <div>

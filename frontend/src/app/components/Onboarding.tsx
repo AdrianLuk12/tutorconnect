@@ -98,7 +98,7 @@ const Onboarding = () => {
                         />
                     </div>
 
-                    <div>
+                    {/* <div>
                         <label className="block mb-2">Profile Picture</label>
                         <input
                             type="file"
@@ -106,7 +106,7 @@ const Onboarding = () => {
                             {...register('profile_picture')}
                             className="w-full p-2 border rounded"
                         />
-                    </div>
+                    </div> */}
 
                     {(role === 'student' || role === 'both') && (
                         <div>
