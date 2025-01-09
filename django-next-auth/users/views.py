@@ -277,3 +277,41 @@ class MatchesListView(APIView):
             })
         
         return Response(matched_users)
+
+class MatchRequestsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        
+        # Get all pending matches where this user is user_b and user_a has accepted
+        pending_matches = Match.objects.filter(
+            user_b=user,
+            status_a=Match.ACCEPTED,
+            status_b=Match.PENDING
+        )
+        
+        match_requests = []
+        for match in pending_matches:
+            other_user = match.user_a
+            other_profile = other_user.profile
+            
+            # Calculate subject overlaps
+            can_help_with = set(other_profile.subjects_can_teach) & set(user.profile.subjects_need_help)
+            can_get_help_with = set(other_profile.subjects_need_help) & set(user.profile.subjects_can_teach)
+            
+            match_requests.append({
+                'user': {
+                    'id': other_user.id,
+                    'username': other_user.username,
+                    'profile_picture': request.build_absolute_uri(other_profile.profile_picture.url) if other_profile.profile_picture else None,
+                },
+                'school': other_profile.school,
+                'subjects_need_help': other_profile.subjects_need_help,
+                'subjects_can_teach': other_profile.subjects_can_teach,
+                'bio': other_profile.bio,
+                'can_help_with': list(can_help_with),
+                'can_get_help_with': list(can_get_help_with)
+            })
+        
+        return Response(match_requests)

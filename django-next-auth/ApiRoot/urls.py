@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from auth.views import LogoutView
-from users.views import OnboardingView, ProfileView, PotentialMatchesView, MatchActionView, MatchesListView
+from users.views import OnboardingView, ProfileView, PotentialMatchesView, MatchActionView, MatchesListView, MatchRequestsView
 
 urlpatterns = [
     path("auth/", include("djoser.urls")),
@@ -28,4 +28,5 @@ urlpatterns = [
     path('potential-matches/', PotentialMatchesView.as_view(), name='potential-matches'),
     path('matches/', MatchesListView.as_view(), name='matches-list'),
     path('matches/<int:user_id>/', MatchActionView.as_view(), name='match-action'),
+    path('match-requests/', MatchRequestsView.as_view(), name='match-requests'),
 ]

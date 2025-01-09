@@ -24,6 +24,7 @@ export default function Dashboard() {
     const router = useRouter();
     const { data: user } = useSWR("/auth/users/me", fetcher);
     const { data: matches } = useSWR<PotentialMatch[]>("/potential-matches", fetcher);
+    const { data: matchRequests } = useSWR<any[]>('/match-requests', fetcher);
 
     const handleMatch = async (userId: number) => {
         try {
@@ -56,6 +57,23 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen bg-gray-100">
             <div className="absolute top-4 right-4 space-x-4">
+                <button
+                    onClick={() => router.push('/matches')}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                >
+                    My Matches
+                </button>
+                <button
+                    onClick={() => router.push('/match-requests')}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors relative"
+                >
+                    Match Requests
+                    {matchRequests && matchRequests.length > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                            {matchRequests.length}
+                        </span>
+                    )}
+                </button>
                 <button
                     onClick={() => router.push('/profile')}
                     className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
