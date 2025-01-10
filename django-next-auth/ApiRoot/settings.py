@@ -160,7 +160,7 @@ DJOSER = {
 
 SITE_NAME = "TutorMatch"
 
-DOMAIN = "tutormatch.onrender.com"
+DOMAIN = "localhost:3000"
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
