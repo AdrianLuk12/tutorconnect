@@ -5,7 +5,7 @@ from rest_framework.response import Response
 import json
 from django.db.models import Q
 from django.contrib.auth import get_user_model
-from .models import Match, Profile
+from .models import Match, Profile, ChatMessage
 
 class OnboardingView(APIView):
     permission_classes = [IsAuthenticated]
@@ -315,3 +315,72 @@ class MatchRequestsView(APIView):
             })
         
         return Response(match_requests)
+
+class ChatHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        try:
+            other_user = get_user_model().objects.get(id=user_id)
+            
+            # Get messages between the two users
+            messages = ChatMessage.objects.filter(
+                (Q(sender=request.user, receiver=other_user) |
+                Q(sender=other_user, receiver=request.user))
+            ).order_by('timestamp')
+            
+            # Mark unread messages as read
+            messages.filter(receiver=request.user, is_read=False).update(is_read=True)
+            
+            messages_data = [{
+                'id': msg.id,
+                'content': msg.content,
+                'sender_id': msg.sender.id,
+                'receiver_id': msg.receiver.id,
+                'timestamp': msg.timestamp,
+                'is_read': msg.is_read
+            } for msg in messages]
+            
+            return Response(messages_data)
+            
+        except get_user_model().DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class MessageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        try:
+            receiver = get_user_model().objects.get(id=user_id)
+            content = request.data.get('message')
+            
+            if not content:
+                return Response(
+                    {'error': 'Message content is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create new message
+            message = ChatMessage.objects.create(
+                sender=request.user,
+                receiver=receiver,
+                content=content
+            )
+
+            return Response({
+                'id': message.id,
+                'content': message.content,
+                'sender_id': message.sender.id,
+                'receiver_id': message.receiver.id,
+                'timestamp': message.timestamp,
+                'is_read': message.is_read
+            })
+
+        except get_user_model().DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )

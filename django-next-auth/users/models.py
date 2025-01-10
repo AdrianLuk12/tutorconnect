@@ -115,3 +115,16 @@ class Match(models.Model):
     @property
     def is_mutual_match(self):
         return self.status_a == self.ACCEPTED and self.status_b == self.ACCEPTED
+
+class ChatMessage(models.Model):
+    sender = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='received_messages')
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"Message from {self.sender.username} to {self.receiver.username}"
