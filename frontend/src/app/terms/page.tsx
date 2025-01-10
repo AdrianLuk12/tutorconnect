@@ -15,7 +15,7 @@ export default function TermsOfUse() {
                     <section className="space-y-4">
                         <h2 className="text-xl font-semibold text-gray-800">1. Acceptance of Terms</h2>
                         <p>
-                            By accessing and using TutorMatch, you accept and agree to be bound by the terms and 
+                            By accessing and using LearnMatch, you accept and agree to be bound by the terms and 
                             provisions of this agreement.
                         </p>
                     </section>

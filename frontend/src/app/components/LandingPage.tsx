@@ -6,7 +6,7 @@ const LandingPage = () => {
         <div className="min-h-screen bg-gray-100 flex flex-col">
             <div className="container mx-auto px-4 py-16 flex-grow">
                 <div className="text-center">
-                    <h1 className="text-4xl font-bold mb-6">Welcome to TutorMatch</h1>
+                    <h1 className="text-4xl font-bold mb-6">Welcome to LearnMatch</h1>
                     <h2 className="text-2xl font-bold mb-6">A peer learning platform</h2>
                     <p className="text-xl mb-8">The platform connects students who want to teach and learn from each other. It matches users based on their skills and learning goals, enabling them to exchange knowledge in a peer-to-peer manner.</p>
                     <div className="space-x-4">

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TutorMatch",
+  title: "LearnMatch",
   description: "A peer learning platform",
 };
 

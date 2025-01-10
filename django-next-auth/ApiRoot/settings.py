@@ -27,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'tutorconnect-back.onrender.com',
-    'tutormatch.onrender.com',
     'localhost',
     '127.0.0.1',
 ]
@@ -158,15 +157,14 @@ DJOSER = {
     "SERIALIZERS": {},
 }
 
-SITE_NAME = "TutorMatch"
+SITE_NAME = "LearnMatch"
 
-DOMAIN = "localhost:3000"
+DOMAIN = "learnmatch.vercel.app"
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://tutorconnect-back.onrender.com",
-    "https://tutormatch.onrender.com",
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
