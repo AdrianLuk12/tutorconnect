@@ -100,6 +100,28 @@ export default function Matches() {
         }
     };
 
+    // Update the input element to a textarea and add keydown handling
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage(e);
+        }
+    };
+
+    // Add this useEffect to auto-resize the textarea
+    useEffect(() => {
+        const textarea = document.querySelector('textarea');
+        if (textarea) {
+            const adjustHeight = () => {
+                textarea.style.height = 'auto';
+                textarea.style.height = `${Math.min(textarea.scrollHeight, 128)}px`; // 128px = 8rem (max-height)
+            };
+            
+            textarea.addEventListener('input', adjustHeight);
+            return () => textarea.removeEventListener('input', adjustHeight);
+        }
+    }, [selectedUser]);
+
     if (!matches) {
         return <div>Loading...</div>;
     }
@@ -198,16 +220,22 @@ export default function Matches() {
                         {/* Fixed input area */}
                         <form onSubmit={sendMessage} className="p-4 border-t bg-white">
                             <div className="flex gap-2">
-                                <input
-                                    type="text"
+                                <textarea
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
-                                    className="flex-1 border rounded-lg px-4 py-2"
-                                    placeholder="Type a message..."
+                                    onKeyDown={handleKeyDown}
+                                    className="flex-1 border rounded-lg px-4 py-2 resize-none min-h-[44px] max-h-32 overflow-y-auto"
+                                    placeholder="Type a message... (Shift + Enter for new line)"
+                                    rows={1}
+                                    style={{
+                                        height: 'auto',
+                                        minHeight: '44px',
+                                        maxHeight: '8rem'
+                                    }}
                                 />
                                 <button
                                     type="submit"
-                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 h-[44px]"
                                 >
                                     Send
                                 </button>
