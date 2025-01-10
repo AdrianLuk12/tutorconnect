@@ -39,6 +39,7 @@ export default function Matches() {
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const pollInterval = useRef<NodeJS.Timeout | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Fetch messages for selected user
     const fetchMessages = async () => {
@@ -122,6 +123,11 @@ export default function Matches() {
         }
     }, [selectedUser]);
 
+    // Add filtered matches logic
+    const filteredMatches = matches?.filter(match =>
+        match.user.username.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     if (!matches) {
         return <div>Loading...</div>;
     }
@@ -132,9 +138,17 @@ export default function Matches() {
             <div className="w-80 bg-white border-r flex flex-col h-screen">
                 <div className="p-4 border-b">
                     <h1 className="text-xl font-bold">Your Matches</h1>
+                    {/* Add search input */}
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full mt-2 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                 </div>
                 <div className="overflow-y-auto flex-1">
-                    {matches.map((match) => (
+                    {filteredMatches?.map((match) => (
                         <div
                             key={match.user.id}
                             className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
