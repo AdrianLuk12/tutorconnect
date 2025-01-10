@@ -203,7 +203,7 @@ const Register = () => {
                                 {...register("terms", { required: "You must accept the Terms and Privacy Policy" })}
                                 className="mr-2"
                             />
-                            <span>I accept the <a href="#" className="text-blue-600 hover:underline">Terms of Use</a> & <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a></span>
+                            <span>I accept the <Link href="/terms" className="text-blue-600 hover:underline">Terms of Use</Link> & <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link></span>
                         </label>
                         {errors.terms && (
                             <span className="text-xs text-red-600">

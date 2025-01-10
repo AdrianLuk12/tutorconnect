@@ -6,7 +6,8 @@ export async function middleware(request: NextRequest) {
   const cookieStore = cookies();
   const accessToken = (await cookieStore).get("accessToken");
 
-  if (!accessToken && request.nextUrl.pathname !== "/") {
+  const publicPaths = ["/", "/terms", "/privacy"];
+  if (!accessToken && !publicPaths.includes(request.nextUrl.pathname)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 }
