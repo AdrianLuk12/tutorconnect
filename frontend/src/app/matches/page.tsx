@@ -106,12 +106,12 @@ export default function Matches() {
 
     return (
         <div className="min-h-screen bg-gray-100 flex">
-            {/* Matches List */}
-            <div className="w-1/3 bg-white border-r">
+            {/* Matches List - Fixed width, independent scroll */}
+            <div className="w-80 bg-white border-r flex flex-col h-screen">
                 <div className="p-4 border-b">
                     <h1 className="text-xl font-bold">Your Matches</h1>
                 </div>
-                <div className="overflow-y-auto h-[calc(100vh-64px)]">
+                <div className="overflow-y-auto flex-1">
                     {matches.map((match) => (
                         <div
                             key={match.user.id}
@@ -140,10 +140,11 @@ export default function Matches() {
                 </div>
             </div>
 
-            {/* Chat Area */}
-            <div className="flex-1 flex flex-col">
+            {/* Chat Area - Flex grow, independent scroll */}
+            <div className="flex-1 flex flex-col h-screen">
                 {selectedUser ? (
                     <>
+                        {/* Fixed header */}
                         <div className="p-4 border-b bg-white">
                             <div className="flex items-center">
                                 {selectedUser.user.profile_picture ? (
@@ -158,7 +159,8 @@ export default function Matches() {
                                 <h2 className="text-xl font-semibold">{selectedUser.user.username}</h2>
                             </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                        {/* Scrollable messages */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
                             {messages.map((message) => {
                                 const isCurrentUser = message.sender_id === parseInt(getToken('user_id') || '0');
                                 return (
@@ -166,19 +168,20 @@ export default function Matches() {
                                         key={message.id}
                                         className={`flex gap-3 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
                                     >
-                                        {/* Message Content */}
-                                        <div className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}>
+                                        <div className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'} max-w-[70%]`}>
                                             <span className="text-xs text-gray-500 mb-1">
                                                 {message.sender?.username}
                                             </span>
                                             <div
-                                                className={`p-3 rounded-lg max-w-[80%] ${
+                                                className={`p-3 rounded-lg inline-block ${
                                                     isCurrentUser
                                                         ? 'bg-blue-500 text-white rounded-br-none'
-                                                        : 'bg-gray-200 rounded-bl-none'
+                                                        : 'bg-white rounded-bl-none shadow-sm'
                                                 }`}
                                             >
-                                                {message.content}
+                                                <span className="whitespace-pre-wrap break-words">
+                                                    {message.content}
+                                                </span>
                                             </div>
                                             <span className="text-xs text-gray-400 mt-1">
                                                 {new Date(message.timestamp).toLocaleTimeString([], {
@@ -192,6 +195,7 @@ export default function Matches() {
                             })}
                             <div ref={messagesEndRef} />
                         </div>
+                        {/* Fixed input area */}
                         <form onSubmit={sendMessage} className="p-4 border-t bg-white">
                             <div className="flex gap-2">
                                 <input
