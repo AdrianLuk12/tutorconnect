@@ -31,7 +31,33 @@ const Onboarding = () => {
     const [selectedSubjectsTeach, setSelectedSubjectsTeach] = useState<string[]>([]);
     const role = watch('role');
 
-    const { getToken } = AuthActions();
+    const handleSubjectNeedChange = (subject: string, checked: boolean) => {
+        if (checked) {
+            // Only add if not in can teach list
+            if (!selectedSubjectsTeach.includes(subject)) {
+                setSelectedSubjectsNeed([...selectedSubjectsNeed, subject]);
+            } else {
+                // Optionally show an error message
+                alert("You cannot select a subject you can already teach!");
+            }
+        } else {
+            setSelectedSubjectsNeed(selectedSubjectsNeed.filter(s => s !== subject));
+        }
+    };
+
+    const handleSubjectTeachChange = (subject: string, checked: boolean) => {
+        if (checked) {
+            // Only add if not in need help list
+            if (!selectedSubjectsNeed.includes(subject)) {
+                setSelectedSubjectsTeach([...selectedSubjectsTeach, subject]);
+            } else {
+                // Optionally show an error message
+                alert("You cannot teach a subject you need help with!");
+            }
+        } else {
+            setSelectedSubjectsTeach(selectedSubjectsTeach.filter(s => s !== subject));
+        }
+    };
 
     const onSubmit = async (data: OnboardingData) => {
         const formData = new FormData();
@@ -40,91 +66,62 @@ const Onboarding = () => {
         formData.append('subjects_need_help', JSON.stringify(selectedSubjectsNeed));
         formData.append('subjects_can_teach', JSON.stringify(selectedSubjectsTeach));
         formData.append('bio', data.bio);
-        
+
         if (data.profile_picture?.[0]) {
             formData.append('profile_picture', data.profile_picture[0]);
         }
 
         try {
-            const result = await wretch("http://localhost:8000")
-                .auth(`Bearer ${getToken("access")}`)
+            await wretch("http://localhost:8000")
+                .auth(`Bearer ${AuthActions().getToken("access")}`)
                 .url("/profile/onboarding/")
                 .post(formData)
-                .json();
+                .res();
 
-            console.log('Onboarding result:', result);
-            router.push('/dashboard');
+            router.push("/dashboard");
         } catch (error) {
-            console.error('Onboarding error:', error);
-            // You might want to show an error message to the user here
+            console.error("Error during onboarding:", error);
         }
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="px-8 py-6 mt-4 text-left bg-white shadow-lg w-2/3">
-                <h3 className="text-2xl font-bold text-center mb-8">Complete Your Profile</h3>
-                
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div>
-                        <label className="block mb-2">I want to...</label>
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+                <h2 className="text-2xl font-bold mb-6">Complete Your Profile</h2>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <div className="mb-4">
+                        <label className="block mb-2">Role</label>
                         <select
-                            {...register('role', { 
-                                required: true,
-                                validate: (value) => value !== 'select' || 'Please select a role' 
-                            })}
+                            {...register('role', { required: true })}
                             className="w-full p-2 border rounded"
-                            defaultValue="select"
                         >
-                            <option value="select" disabled>Select an option</option>
-                            <option value="student">Get Help with Studies</option>
-                            <option value="tutor">Tutor Others</option>
+                            <option value="select">Select a role</option>
+                            <option value="student">Student</option>
+                            <option value="tutor">Tutor</option>
                             <option value="both">Both</option>
                         </select>
-                        {errors.role && (
-                            <span className="text-xs text-red-600">
-                                {errors.role.message || 'This field is required'}
-                            </span>
-                        )}
                     </div>
 
-                    <div>
+                    <div className="mb-4">
                         <label className="block mb-2">School/University</label>
                         <input
                             type="text"
                             {...register('school', { required: true })}
                             className="w-full p-2 border rounded"
-                            placeholder="Enter your school name"
+                            placeholder="Enter your school or university"
                         />
                     </div>
 
-                    {/* <div>
-                        <label className="block mb-2">Profile Picture</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            {...register('profile_picture')}
-                            className="w-full p-2 border rounded"
-                        />
-                    </div> */}
-
                     {(role === 'student' || role === 'both') && (
-                        <div>
+                        <div className="mb-4">
                             <label className="block mb-2">Subjects I Need Help With</label>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="grid grid-cols-2 gap-2">
                                 {AVAILABLE_SUBJECTS.map(subject => (
-                                    <label key={subject} className="inline-flex items-center">
+                                    <label key={subject} className="flex items-center">
                                         <input
                                             type="checkbox"
-                                            value={subject}
                                             checked={selectedSubjectsNeed.includes(subject)}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    setSelectedSubjectsNeed([...selectedSubjectsNeed, subject]);
-                                                } else {
-                                                    setSelectedSubjectsNeed(selectedSubjectsNeed.filter(s => s !== subject));
-                                                }
-                                            }}
+                                            onChange={(e) => handleSubjectNeedChange(subject, e.target.checked)}
                                             className="mr-2"
                                         />
                                         {subject}
@@ -135,22 +132,15 @@ const Onboarding = () => {
                     )}
 
                     {(role === 'tutor' || role === 'both') && (
-                        <div>
+                        <div className="mb-4">
                             <label className="block mb-2">Subjects I Can Teach</label>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="grid grid-cols-2 gap-2">
                                 {AVAILABLE_SUBJECTS.map(subject => (
-                                    <label key={subject} className="inline-flex items-center">
+                                    <label key={subject} className="flex items-center">
                                         <input
                                             type="checkbox"
-                                            value={subject}
                                             checked={selectedSubjectsTeach.includes(subject)}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    setSelectedSubjectsTeach([...selectedSubjectsTeach, subject]);
-                                                } else {
-                                                    setSelectedSubjectsTeach(selectedSubjectsTeach.filter(s => s !== subject));
-                                                }
-                                            }}
+                                            onChange={(e) => handleSubjectTeachChange(subject, e.target.checked)}
                                             className="mr-2"
                                         />
                                         {subject}
@@ -172,7 +162,7 @@ const Onboarding = () => {
 
                     <button
                         type="submit"
-                        className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 mt-4"
                     >
                         Complete Profile
                     </button>

@@ -53,7 +53,7 @@ const login = (email: string, password: string) => {
 
 const logout = () => {
     const refreshToken = getToken("refresh");
-    return api.post({ refresh: refreshToken }, "/auth/logout/");
+    return api.post({ refresh: refreshToken }, "/auth/logout");
 };
 
 const handleJWTRefresh = () => {

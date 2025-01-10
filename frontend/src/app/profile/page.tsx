@@ -64,6 +64,34 @@ export default function Profile() {
 
     const role = watch('role');
 
+    const handleSubjectNeedChange = (subject: string, checked: boolean) => {
+        if (checked) {
+            // Only add if not in can teach list
+            if (!selectedSubjectsTeach.includes(subject)) {
+                setSelectedSubjectsNeed([...selectedSubjectsNeed, subject]);
+            } else {
+                // Optionally show an error message
+                alert("You cannot select a subject you can already teach!");
+            }
+        } else {
+            setSelectedSubjectsNeed(selectedSubjectsNeed.filter(s => s !== subject));
+        }
+    };
+
+    const handleSubjectTeachChange = (subject: string, checked: boolean) => {
+        if (checked) {
+            // Only add if not in need help list
+            if (!selectedSubjectsNeed.includes(subject)) {
+                setSelectedSubjectsTeach([...selectedSubjectsTeach, subject]);
+            } else {
+                // Optionally show an error message
+                alert("You cannot teach a subject you need help with!");
+            }
+        } else {
+            setSelectedSubjectsTeach(selectedSubjectsTeach.filter(s => s !== subject));
+        }
+    };
+
     const { data: user } = useSWR<User>("/auth/users/me", fetcher);
 
     // Fetch profile data
@@ -181,12 +209,22 @@ export default function Profile() {
                             <label className="block mb-2">Username</label>
                             <input
                                 type="text"
-                                {...register('username', { required: true })}
+                                {...register('username', { 
+                                    required: true,
+                                    pattern: {
+                                        value: /^[^\s]+$/,
+                                        message: "Username cannot contain spaces"
+                                    }
+                                })}
                                 defaultValue={user?.username}
                                 className="w-full p-2 border rounded"
                             />
                             {errors.username && (
-                                <span className="text-red-500 text-sm">Username is required</span>
+                                <span className="text-red-500 text-sm">
+                                    {errors.username.type === 'required' 
+                                        ? 'Username is required' 
+                                        : errors.username.message}
+                                </span>
                             )}
                         </div>
 
@@ -231,13 +269,14 @@ export default function Profile() {
                                                 type="checkbox"
                                                 value={subject}
                                                 checked={selectedSubjectsNeed.includes(subject)}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) {
-                                                        setSelectedSubjectsNeed([...selectedSubjectsNeed, subject]);
-                                                    } else {
-                                                        setSelectedSubjectsNeed(selectedSubjectsNeed.filter(s => s !== subject));
-                                                    }
-                                                }}
+                                                // onChange={(e) => {
+                                                //     if (e.target.checked) {
+                                                //         setSelectedSubjectsNeed([...selectedSubjectsNeed, subject]);
+                                                //     } else {
+                                                //         setSelectedSubjectsNeed(selectedSubjectsNeed.filter(s => s !== subject));
+                                                //     }
+                                                // }}
+                                                onChange={(e) => handleSubjectNeedChange(subject, e.target.checked)}
                                                 className="mr-2"
                                             />
                                             {subject}
@@ -257,13 +296,14 @@ export default function Profile() {
                                                 type="checkbox"
                                                 value={subject}
                                                 checked={selectedSubjectsTeach.includes(subject)}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) {
-                                                        setSelectedSubjectsTeach([...selectedSubjectsTeach, subject]);
-                                                    } else {
-                                                        setSelectedSubjectsTeach(selectedSubjectsTeach.filter(s => s !== subject));
-                                                    }
-                                                }}
+                                                // onChange={(e) => {
+                                                //     if (e.target.checked) {
+                                                //         setSelectedSubjectsTeach([...selectedSubjectsTeach, subject]);
+                                                //     } else {
+                                                //         setSelectedSubjectsTeach(selectedSubjectsTeach.filter(s => s !== subject));
+                                                //     }
+                                                // }}
+                                                onChange={(e) => handleSubjectTeachChange(subject, e.target.checked)}
                                                 className="mr-2"
                                             />
                                             {subject}
