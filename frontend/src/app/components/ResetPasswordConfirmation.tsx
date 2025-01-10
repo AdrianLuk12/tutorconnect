@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { AuthActions } from "@/app/auth/utils";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -7,7 +7,8 @@ type FormData = {
     confirm_password: string;
 };
 
-const ResetPasswordConfirmation = () => {
+// Create a separate component for the form
+const ResetPasswordForm = () => {
     const {
         register,
         handleSubmit,
@@ -131,7 +132,15 @@ const ResetPasswordConfirmation = () => {
             </div>
         </div>
     );
+};
 
+// Main component with Suspense
+const ResetPasswordConfirmation = () => {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ResetPasswordForm />
+        </Suspense>
+    );
 };
 
 export default ResetPasswordConfirmation;
