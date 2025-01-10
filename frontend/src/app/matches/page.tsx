@@ -34,31 +34,58 @@ export default function Matches() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const pollInterval = useRef<NodeJS.Timeout | null>(null);
-
-    // Fetch messages for selected user
-    const fetchMessages = async () => {
-        if (selectedUser) {
-            try {
-                const data = await fetcher(`/chat-history/${selectedUser.user.id}`);
-                setMessages(data);
-            } catch (error) {
-                console.error('Error fetching messages:', error);
-            }
-        }
-    };
+    const eventSourceRef = useRef<EventSource | null>(null);
 
     useEffect(() => {
         if (selectedUser) {
-            // Initial fetch
-            fetchMessages();
+            // Initial fetch of message history
+            fetcher(`/chat-history/${selectedUser.user.id}`).then(setMessages);
 
-            // Set up polling
-            pollInterval.current = setInterval(fetchMessages, 3000); // Poll every 3 seconds
+            // Set up SSE connection
+            const eventSourceUrl = new URL(`http://localhost:8000/chat-stream/${selectedUser.user.id}/`);
+            eventSourceUrl.searchParams.append('token', getToken('access') || '');
+
+            const setupEventSource = () => {
+                const eventSource = new EventSource(eventSourceUrl.toString(), {
+                    withCredentials: true
+                });
+
+                eventSource.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        setMessages(prev => {
+                            // Check if message already exists
+                            if (!prev.find(msg => msg.id === data.id)) {
+                                const newMessages = [...prev, data];
+                                // Sort messages by timestamp
+                                return newMessages.sort((a, b) => 
+                                    new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+                                );
+                            }
+                            return prev;
+                        });
+                    } catch (error) {
+                        console.error('Error parsing message:', error);
+                    }
+                };
+
+                eventSource.onerror = (error) => {
+                    console.error('SSE error:', error);
+                    eventSource.close();
+                    // Try to reconnect after 1 second
+                    setTimeout(setupEventSource, 1000);
+                };
+
+                eventSourceRef.current = eventSource;
+            };
+
+            // Initial setup
+            setupEventSource();
 
             return () => {
-                if (pollInterval.current) {
-                    clearInterval(pollInterval.current);
+                if (eventSourceRef.current) {
+                    eventSourceRef.current.close();
+                    eventSourceRef.current = null;
                 }
             };
         }
@@ -87,9 +114,17 @@ export default function Matches() {
                     throw new Error('Failed to send message');
                 }
 
-                const newMessageData = await response.json();
-                setMessages(prev => [...prev, newMessageData]);
+                // Clear input immediately
                 setNewMessage('');
+
+                // Add the new message to the UI
+                const newMessageData = await response.json();
+                setMessages(prev => {
+                    const newMessages = [...prev, newMessageData];
+                    return newMessages.sort((a, b) => 
+                        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+                    );
+                });
             } catch (error) {
                 console.error('Error sending message:', error);
             }

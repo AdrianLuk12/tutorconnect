@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from auth.views import LogoutView
-from users.views import OnboardingView, ProfileView, PotentialMatchesView, MatchActionView, MatchesListView, MatchRequestsView, ChatHistoryView, MessageView
+from users.views import OnboardingView, ProfileView, PotentialMatchesView, MatchActionView, MatchesListView, MatchRequestsView, ChatHistoryView, MessageView, ChatStreamView
 
 urlpatterns = [
     path("auth/", include("djoser.urls")),
@@ -31,4 +31,5 @@ urlpatterns = [
     path('match-requests/', MatchRequestsView.as_view(), name='match-requests'),
     path('chat-history/<int:user_id>/', ChatHistoryView.as_view(), name='chat-history'),
     path('messages/<int:user_id>/', MessageView.as_view(), name='send-message'),
+    path('chat-stream/<int:user_id>/', ChatStreamView.as_view(), name='chat-stream'),
 ]

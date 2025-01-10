@@ -6,7 +6,12 @@ import json
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from .models import Match, Profile, ChatMessage
-
+from django.http import StreamingHttpResponse, HttpResponse
+import asyncio
+import time
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 class OnboardingView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -384,3 +389,69 @@ class MessageView(APIView):
                 {'error': 'User not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ChatStreamView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        try:
+            other_user = get_user_model().objects.get(id=user_id)
+            
+            def event_stream():
+                last_id = 0
+                while True:
+                    # Get new messages
+                    messages = ChatMessage.objects.filter(
+                        (Q(sender=request.user, receiver=other_user) |
+                         Q(sender=other_user, receiver=request.user)),
+                        id__gt=last_id
+                    ).order_by('timestamp')
+
+                    if messages.exists():
+                        for message in messages:
+                            last_id = message.id
+                            data = {
+                                'id': message.id,
+                                'content': message.content,
+                                'sender_id': message.sender.id,
+                                'receiver_id': message.receiver.id,
+                                'timestamp': message.timestamp.isoformat(),
+                                'is_read': message.is_read
+                            }
+                            yield f"data: {json.dumps(data)}\n\n"
+
+                    yield ":\n\n"  # Keep-alive
+                    time.sleep(0.1)  # Check every 100ms for more responsive updates
+
+            response = StreamingHttpResponse(
+                event_stream(),
+                content_type='text/event-stream'
+            )
+            
+            # Add CORS headers
+            origin = request.headers.get('Origin')
+            if origin in settings.CORS_ALLOWED_ORIGINS:
+                response['Access-Control-Allow-Origin'] = origin
+            response['Access-Control-Allow-Credentials'] = 'true'
+            response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+            response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
+            response['Cache-Control'] = 'no-cache, no-transform'
+            response['X-Accel-Buffering'] = 'no'
+            return response
+
+        except get_user_model().DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    def options(self, request, *args, **kwargs):
+        response = HttpResponse()
+        origin = request.headers.get('Origin')
+        if origin in settings.CORS_ALLOWED_ORIGINS:
+            response['Access-Control-Allow-Origin'] = origin
+        response['Access-Control-Allow-Credentials'] = 'true'
+        response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
+        return response
