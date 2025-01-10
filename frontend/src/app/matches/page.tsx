@@ -77,7 +77,7 @@ export default function Matches() {
         e.preventDefault();
         if (newMessage.trim() && selectedUser) {
             try {
-                const response = await fetch(`http://localhost:8000/messages/${selectedUser.user.id}/`, {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/messages/${selectedUser.user.id}/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

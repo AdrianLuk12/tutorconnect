@@ -72,7 +72,7 @@ const Onboarding = () => {
         }
 
         try {
-            await wretch("http://localhost:8000")
+            await wretch(process.env.NEXT_PUBLIC_API_URL)
                 .auth(`Bearer ${AuthActions().getToken("access")}`)
                 .url("/profile/onboarding/")
                 .post(formData)

@@ -98,7 +98,7 @@ export default function Profile() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const data = await wretch("http://localhost:8000")
+                const data = await wretch(process.env.NEXT_PUBLIC_API_URL)
                     .auth(`Bearer ${getToken("access")}`)
                     .url("/profile/")
                     .get()
@@ -136,7 +136,7 @@ export default function Profile() {
         }
 
         try {
-            const result = await wretch("http://localhost:8000")
+            const result = await wretch(process.env.NEXT_PUBLIC_API_URL)
                 .auth(`Bearer ${getToken("access")}`)
                 .url("/profile/")
                 .put(formData)

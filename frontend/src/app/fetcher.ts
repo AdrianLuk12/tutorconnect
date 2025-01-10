@@ -7,7 +7,7 @@ const { handleJWTRefresh, storeToken, getToken } = AuthActions();
 
 const api = () => {
     return (
-        wretch("http://localhost:8000")
+        wretch(process.env.NEXT_PUBLIC_API_URL)
             // Initialize authentication with the access token.
             .auth(`Bearer ${getToken("access")}`)
             // Catch 401 errors to refresh the token and retry the request.

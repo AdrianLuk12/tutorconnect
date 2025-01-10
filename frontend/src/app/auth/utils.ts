@@ -1,7 +1,7 @@
 import wretch from "wretch";
 import Cookies from "js-cookie";
 
-const api = wretch("http://localhost:8000").accept("application/json");
+const api = wretch(process.env.NEXT_PUBLIC_API_URL).accept("application/json");
 
 /**
  * Stores a token in cookies.

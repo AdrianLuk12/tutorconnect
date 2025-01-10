@@ -35,7 +35,7 @@ export default function Dashboard() {
             }
 
             // Make the API call
-            await wretch("http://localhost:8000")
+            await wretch(process.env.NEXT_PUBLIC_API_URL)
                 .auth(`Bearer ${getToken("access")}`)
                 .url(`/matches/${userId}/`)
                 .post({ action: 'accept' });
@@ -58,7 +58,7 @@ export default function Dashboard() {
             }
 
             // Make the API call
-            await wretch("http://localhost:8000")
+            await wretch(process.env.NEXT_PUBLIC_API_URL)
                 .auth(`Bearer ${getToken("access")}`)
                 .url(`/matches/${userId}/`)
                 .post({ action: 'reject' });
