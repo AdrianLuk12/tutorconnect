@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'tutorconnect-back.onrender.com',
+    'tutormatch.onrender.com',
     'localhost',
     '127.0.0.1',
 ]
@@ -159,7 +160,7 @@ DJOSER = {
 
 SITE_NAME = "TutorMatch"
 
-DOMAIN = "localhost:3000"
+DOMAIN = "tutormatch.onrender.com"
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
