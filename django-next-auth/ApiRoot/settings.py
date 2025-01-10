@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-v79t919vn%8vx(y--h=_%6rw3v$1=hb7_n^il@vb#wkz6_2^)e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'tutorconnect-back.onrender.com',
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -153,13 +157,15 @@ DJOSER = {
     "SERIALIZERS": {},
 }
 
-SITE_NAME = "TutorConnect"
+SITE_NAME = "TutorMatch"
 
 DOMAIN = "localhost:3000"
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://tutorconnect-back.onrender.com",
+    "https://tutormatch.onrender.com",
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
