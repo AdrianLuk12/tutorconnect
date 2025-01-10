@@ -13,6 +13,10 @@ interface Message {
     receiver_id: number;
     timestamp: string;
     is_read: boolean;
+    sender?: {
+        username: string;
+        profile_picture: string | null;
+    };
 }
 
 interface MatchedUser {
@@ -141,32 +145,51 @@ export default function Matches() {
                 {selectedUser ? (
                     <>
                         <div className="p-4 border-b bg-white">
-                            <h2 className="text-xl font-semibold">{selectedUser.user.username}</h2>
+                            <div className="flex items-center">
+                                {selectedUser.user.profile_picture ? (
+                                    <img
+                                        src={selectedUser.user.profile_picture}
+                                        alt={selectedUser.user.username}
+                                        className="w-10 h-10 rounded-full mr-3"
+                                    />
+                                ) : (
+                                    <div className="w-10 h-10 rounded-full bg-gray-200 mr-3" />
+                                )}
+                                <h2 className="text-xl font-semibold">{selectedUser.user.username}</h2>
+                            </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4">
-                            {messages.map((message) => (
-                                <div
-                                    key={message.id}
-                                    className={`mb-4 ${
-                                        message.sender_id === parseInt(getToken('user_id') || '0')
-                                            ? 'text-right'
-                                            : 'text-left'
-                                    }`}
-                                >
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                            {messages.map((message) => {
+                                const isCurrentUser = message.sender_id === parseInt(getToken('user_id') || '0');
+                                return (
                                     <div
-                                        className={`inline-block p-3 rounded-lg ${
-                                            message.sender_id === parseInt(getToken('user_id') || '0')
-                                                ? 'bg-blue-500 text-white'
-                                                : 'bg-gray-200'
-                                        }`}
+                                        key={message.id}
+                                        className={`flex gap-3 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
                                     >
-                                        {message.content}
+                                        {/* Message Content */}
+                                        <div className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}>
+                                            <span className="text-xs text-gray-500 mb-1">
+                                                {message.sender?.username}
+                                            </span>
+                                            <div
+                                                className={`p-3 rounded-lg max-w-[80%] ${
+                                                    isCurrentUser
+                                                        ? 'bg-blue-500 text-white rounded-br-none'
+                                                        : 'bg-gray-200 rounded-bl-none'
+                                                }`}
+                                            >
+                                                {message.content}
+                                            </div>
+                                            <span className="text-xs text-gray-400 mt-1">
+                                                {new Date(message.timestamp).toLocaleTimeString([], {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="text-xs text-gray-500 mt-1">
-                                        {new Date(message.timestamp).toLocaleTimeString()}
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                             <div ref={messagesEndRef} />
                         </div>
                         <form onSubmit={sendMessage} className="p-4 border-t bg-white">

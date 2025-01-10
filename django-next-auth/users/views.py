@@ -338,7 +338,11 @@ class ChatHistoryView(APIView):
                 'sender_id': msg.sender.id,
                 'receiver_id': msg.receiver.id,
                 'timestamp': msg.timestamp,
-                'is_read': msg.is_read
+                'is_read': msg.is_read,
+                'sender': {
+                    'username': msg.sender.username,
+                    'profile_picture': request.build_absolute_uri(msg.sender.profile.profile_picture.url) if msg.sender.profile.profile_picture else None,
+                }
             } for msg in messages]
             
             return Response(messages_data)
@@ -376,7 +380,11 @@ class MessageView(APIView):
                 'sender_id': message.sender.id,
                 'receiver_id': message.receiver.id,
                 'timestamp': message.timestamp,
-                'is_read': message.is_read
+                'is_read': message.is_read,
+                'sender': {
+                    'username': message.sender.username,
+                    'profile_picture': request.build_absolute_uri(message.sender.profile.profile_picture.url) if message.sender.profile.profile_picture else None,
+                }
             })
 
         except get_user_model().DoesNotExist:
