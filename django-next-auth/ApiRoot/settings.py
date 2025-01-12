@@ -27,8 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'tutorconnect-back.onrender.com',
-    'localhost',
-    '127.0.0.1',
 ]
 
 
@@ -162,8 +160,6 @@ SITE_NAME = "LearnMatch"
 DOMAIN = "learnmatch.vercel.app"
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
     "https://learnmatch.vercel.app",
 ]
 
