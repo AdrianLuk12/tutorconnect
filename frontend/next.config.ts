@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   env: {
-    NEXT_PUBLIC_API_URL: 'https://tutorconnect-back.onrender.com',
+    NEXT_PUBLIC_API_URL: 'http://localhost:8000',
   },
 };
 

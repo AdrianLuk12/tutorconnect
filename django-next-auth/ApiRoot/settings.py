@@ -25,8 +25,8 @@ SECRET_KEY = 'django-insecure-v79t919vn%8vx(y--h=_%6rw3v$1=hb7_n^il@vb#wkz6_2^)e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+### CHANGE IN PRODUCTION
 ALLOWED_HOSTS = [
-    'tutorconnect-back.onrender.com',
     'localhost',
     '127.0.0.1',
 ]
@@ -159,12 +159,13 @@ DJOSER = {
 
 SITE_NAME = "LearnMatch"
 
-DOMAIN = "learnmatch.vercel.app"
+### CHANGE IN PRODUCTION
+DOMAIN = "localhost:3000"
 
+### CHANGE IN PRODUCTION
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://learnmatch.vercel.app",
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
